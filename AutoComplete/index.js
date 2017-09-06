@@ -92,6 +92,7 @@ AutoComplete.prototype = {
             _this.$main.append(_this.$holder);
         });
     },
+    
     /**
      * 获取当前项
      * @data {array} options 选项
@@ -99,6 +100,24 @@ AutoComplete.prototype = {
     getSelection: function(){
         return this.currentOption;
     },
+
+    /**
+     * 匹配
+     */
+    fuzzyFilter: function(searchText, key){
+        var compareString = key.toLowerCase();
+        searchText = searchText.toLowerCase();
+
+        var searchTextIndex = 0;
+        for (var index = 0; index < key.length; index++) {
+            if (compareString[index] === searchText[searchTextIndex]) {
+                searchTextIndex += 1;
+            }
+        }
+
+        return searchTextIndex === searchText.length;
+    }
+
     /**
      * 选择
      */
