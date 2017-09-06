@@ -70,7 +70,7 @@ AutoComplete.prototype = {
         });
 
         this.$holder.on('click', function(e){
-            _this.click.call(_this, e);
+            _this.check.call(_this, e);
         });
 
         this.$selected.on('click', function(e){
@@ -100,9 +100,9 @@ AutoComplete.prototype = {
         return this.currentOption;
     },
     /**
-     * 点击处理
+     * 选择
      */
-    click: function(e){
+    check: function(e){
         var $current = $(e.target);
         if ($current.hasClass('options')) {
             if ($current.val() < 0 ) {
