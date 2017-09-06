@@ -101,6 +101,18 @@ AutoComplete.prototype = {
         return this.currentOption;
     },
 
+    getText: function () {
+        return this.currentOption.text;
+    }
+
+    getValue: function () {
+        return this.currentOption.value;
+    }
+
+    getSearchKey: function(){
+
+    }
+
     /**
      * 匹配
      */

@@ -2,22 +2,25 @@
  * AutoComplete
  * @class
  * @param {HTMLElement|jQeruyObject} item              目标元素
- * @param {Object}      [options]                      参数
+ * @param {
+ *      asyncFilter {function}            异步过滤函数(调用方A函数)
+    }      [options]                      参数
  */
 function AutoComplete(item, options){
     //判断是否是jQuery对象，数组或是单个DOM节点。
     var defaultOption = {
         styles: {
-            width: '348px',
+            width: '350px',
             arrow: true
         },
-        tips:{
-            header:'默认展示前5条匹配结果，请输入更多以精确匹配',
-            footer:'请输入更多关键字查询',
-        },
-        isAtFirstGetData:true,
-        url:'http://123.com',
-        showNumber:5,
+        // asyncFilter: function(){},
+        header:'默认展示前5条匹配结果，请输入更多以精确匹配',
+        footer:'请输入更多关键字查询',
+        data: [{
+            text: '请选择',
+            value: -1
+        }],
+        showNumber: 5
     };
 
     this.options = $.extend(defaultOption, options || {});
@@ -52,76 +55,73 @@ AutoComplete.prototype = {
      */
     init:function(options){
         var _this = this;
-        this.tipHeader = this.options.tips.header;
-        this.tipFooter = this.options.tips.footer;
-        this.inputWidth = this.options.styles.width;
-        this.arrow = this.options.styles.arrow;
-        this.isAtFirstGetData = this.options.isAtFirstGetData;
-        this.url = this.options.url;
-        this.showNumber = this.options.showNumber;
-
-        this.$input = $('<input type="text" placeholder="请选择" class="select-input-default" style="width:'+this.inputWidth+';"/>');
-        this.$selected = $('<div class="select-selection-selected" style="width:'+this.inputWidth+';"></div>');
-        this.$holder = $('<div class="options-holder" style="width:360px;">');
+        this.timer = null;
+        this.blurTimer = null;      // blur时是否关闭
+        this.$input = $('<input type="text" class="select-input-default" />');
+        this.$selected = $('<div class="select-selection-selected"></div>');
+        this.$holder = $('<div class="options-holder">');
         this.$main.addClass('auto-complete')
             .append(this.$selected)
-            .append(this.$input);
+            .append(this.$input)
+            .append(this.$holder);
 
-        this.fiterdata = this.filterData(this.getAllData(''));
-        console.log(this.fiterdata)
-        if(this.isAtFirstGetData && this.url.length !=0){
-            //当只有一条数据时，回显
-            if(this.fiterdata.length == 1){
-                this.$selected.text(this.fiterdata[0].text)
-                    .attr({value: this.fiterdata[0].value});
-            }else {
-                this.setData(this.fiterdata);
-            }
-
-        }else {
-            if(this.url.length == 0){
-                alert('请配置select的url')
-            }else {
-                //调用方获得值后实现A函数，传给B函数后再渲染
-            }
-        }
-
-        // if(this.arrow){
-        //     this.$input.addClass('select-input-arrow');
-        // }
+        this.options.data && this.setData(this.options.data);
+        this.setStyles();
+        this.setPlaceholder();
 
         this.currentOption = null;
 
-        this.$input.on('click', function(e){
-            _this.toggle();
+        this.$input.on('focus', function(e){
+            setTimeout(function(){
+                _this.toggleHolder();
+            }, 1000 * 1);
+        }).on('blur', function(e){
+            // 延迟触发,保证blur触发在option的click之后
+            _this.blurTimer = setTimeout(function(){
+                if (_this.$holder.is(':visible')) {
+                    _this.$selected.show();
+                    _this.$holder.hide();
+                }
+                // 如果不是点击选项关闭，则设置输入框内的值
+                var searchKey = _this.getSearchKey();
+                var newOption = null;
+                if (searchKey === '') {
+                    
+                }else{
+                    newOption = {
+                        text: searchKey,
+                        value: searchKey
+                    }
+                    _this.setSelection(newOption);
+                }
+            }, 200);
+        }).on('keydown', function(e){
+            clearTimeout(_this.timer);
+            _this.timer = setTimeout(function(){
+                if (_this.options.asyncFilter) {
+                    _this.options.asyncFilter(_this.getSearchKey());
+                }else{
+                    _this.options.data && _this.setData(_this.options.data);
+                }
+            }, 1000 * 1);
         });
-        this.$input.on('keyup',$.proxy(this,'keywordSearch'));
 
         this.$holder.on('click', function(e){
-            _this.click.call(_this, e);
+            _this.select.call(_this, e);
         });
 
         this.$selected.on('click', function(e){
-            _this.toggle();
-            // _this.$input.focus();
-            console.log(_this.arrow)
-            _this.$input.attr('class','select-input-checked');
-            // if(_this.arrow){
-            //     _this.$input.attr('class','select-input-checked'+' select-input-arrowUp');
-            // }else {
-            //     _this.$input.attr('class','select-input-checked');
-            // }
-
+            _this.toggleSelected();
+            _this.$input.focus();
+            // _this.$input.addClass('select-input-checked');
         });
-        this.$input.focus(function(e){
-            $(_this).attr('placeholder',"");
-            console.log($(_this).attr('placeholder'))
-        })
+    },
+    /**
+     * 设置样式
+     * @data {obj} styles 样式项
+     */
+    setStyles: function(){
 
-        this.$input.blur(function(e){
-            $(_this).attr('placeholder',"请选择!!!");
-            console.log($(_this).attr('placeholder'))
-        })
     },
     /**
      * 设置选项
@@ -129,80 +129,160 @@ AutoComplete.prototype = {
      */
     setData: function(data){
         var _this = this;
+
+        this.options.data = data;
+        var filterData = this.filterData(data);
+
         this.$holder.empty();
-        if(_this.tipHeader.length != 0){
-            _this.$holder.append('<div class="options-select-tipHeader">'+_this.tipHeader+'</div>')
-        }
-        $.each(data, function(index, option){
-            var newOption = $('<div class="options"></div>').text(option.text)
+        $.each(filterData, function(index, option){
+            if (index >= _this.options.showNumber) {
+                return ;
+            }
+            var newOption = $('<div class="options"></div>')
+                .text(option.text)
                 .attr({value: option.value});
             _this.$holder.append(newOption);
-            _this.$main.append(_this.$holder);
         });
-        if(_this.tipFooter.length != 0 && this.getAllData().length > this.showNumber){
-            _this.$holder.append('<div class="options-select-tipFooter">'+_this.tipFooter+'</div>')
+
+        if (filterData.length === 1 && filterData[0].value > 0){
+            this.setSelection(filterData[0]);
+        }
+        if (this.options.header && filterData.length > 0){
+            var headerOption = $('<div class="options-select-tip"></div>')
+                .text(this.options.header)
+                .attr({value: -2});
+            this.$holder.prepend(headerOption);
+        }
+        if (this.options.showNumber && filterData.length > this.options.showNumber){
+            var overOption = $('<div class="options-select-tip"></div>')
+                .text(this.options.footer || '请输入更多关键字查询')
+                .attr({value: -3});
+            this.$holder.append(overOption)
         }
     },
     /**
-     * 获取数据
-     * @url {String} options 选项
+     * 过滤数据
+     */
+    filterData: function (data) {
+        var filterData = [];
+        var searchKey = this.getSearchKey();
+        var len = data.length;
+        if (searchKey) {
+            for (var i = 0; i < len; i++) {
+                if (this.fuzzyFilter(searchKey, data[i].text)) {
+                    filterData.push(data[i]);
+                }
+            }
+            return filterData;
+        }else{
+            return data;
+        }
+    },
+    /**
+     * 匹配
+     */
+    fuzzyFilter: function(searchKey, searchText){
+        var compareString = searchText.toLowerCase();
+        searchKey = searchKey.toLowerCase();
+
+        var searchTextIndex = 0;
+        for (var index = 0; index < searchText.length; index++) {
+            if (compareString[index] === searchKey[searchTextIndex]) {
+                searchTextIndex += 1;
+            }
+        }
+
+        return searchTextIndex === searchKey.length;
+    },
+    /**
+     * 点击处理
+     */
+    select: function(e){
+        var $current = $(e.target);
+
+        clearTimeout(this.blurTimer);
+
+        if ($current.hasClass('options')) {
+            if ($current.val() < 0 ) {
+                return;
+            }
+            this.setSelection({
+                text: $current.text(),
+                value: $current.val()
+            });
+            $('.options').removeClass('selected');
+            $current.addClass('selected');
+            this.options.onClick && _this.options.onClick();
+        }
+    },
+    /**
+     * 设置当前选择项
+     */
+    setSelection: function(option){
+        this.currentOption = {
+            text: option.text,
+            value: option.value
+        }
+        this.$input.val(option.text);
+        this.$selected.text(option.text)
+            .attr({value: option.value})
+            .removeClass('placeholder');
+
+        this.$holder.hide();
+        this.$selected.show();
+    },
+    /**
+     * 获取当前项
+     * @data {array} options 选项
+     */
+    getSelection: function(){
+        return this.currentOption;
+    },
+
+    getSearchKey: function(){
+        var searchKey = $.trim(this.$input.val());
+        this.searchKey = searchKey;
+        return searchKey;
+    },
+    /**
+     * 获取选中的 value 值
      * @return {String}
      */
-    getAllData:function () {
-        var _this = this;
-
-        this.data= [{
-            text: '请选择测试超过宽度的样式',
-            value: -1,
-            isDefault:false
-        },{
-            text: 'option1',
-            value: 1,
-            isDefault:false
-        },{
-            text: 'option2',
-            value: 2,
-            isDefault:false
-        },{
-            text: 'option3',
-            value: 3,
-            isDefault:false
-        },{
-            text: 'option4',
-            value: 4,
-            isDefault:false
-        },{
-            text: 'option5',
-            value: 5,
-            isDefault:false
-        },{
-            text: 'option6',
-            value: 6,
-            isDefault:false
-        }];
-
-        $.ajax({
-            url:_this.url,
-            type:'POST',
-            data:{key:_this.getValue()},
-            dataType:'json',
-            success:function (msg) {
-                
-            }
-        })
-        return this.data;
+    getValue: function() {
+        return this.currentOption.value;
     },
-    filterData:function (json) {
-        var _this = this;
-        var filterData = [];
-        var temp = [];
-        for(var i=0;i<_this.showNumber;i++){
-            for(var key in json[i]){
-                temp.push({[key]:json[i][key]});
-            }
-            filterData.push(temp);
+    /**
+     * 获取选中的 text 值
+     * @return {String}
+     */
+    getText: function() {
+        return this.currentOption.text;
+    },
+
+    /**
+     * 切换待选框
+     */
+    toggleHolder: function(){
+        this.$holder.toggle();
+    },
+    /**
+     * 切换已选
+     */
+    toggleSelected: function(){
+        this.$selected.toggle();
+        if (this.$selected.is(':visible')) {
+            this.setPlaceholder();
         }
-        return filterData;
+    },
+
+    /**
+     * 设置placeholder
+     */
+    setPlaceholder: function(){
+        var searchKey = this.getSearchKey();
+        if (searchKey === null || searchKey === '') {
+            this.$selected.text(this.options.placeholder || '请选择').addClass('placeholder');
+        }
     },
     //关键词搜索
     keywordSearch: function(e){
@@ -266,54 +346,6 @@ AutoComplete.prototype = {
         }
     },
     /**
-     * 获取当前项
-     * @data {array} options 选项
-     */
-    getSelection: function(){
-        return this.currentOption;
-    },
-    /**
-     * 点击处理
-     */
-    click: function(e){
-        var $current = $(e.target);
-        if ($current.hasClass('options')) {
-            if ($current.val() < 0 ) {
-                return;
-            }
-            this.currentOption = {
-                text: $current.text(),
-                value: $current.val()
-            }
-            this.$selected.text($current.text())
-                .attr({value: $current.val()});
-            this.toggle();
-            this.options.onClick && _this.options.onClick();
-        }
-    },
-    /**
-     * 切换
-     */
-    toggle: function(){
-        this.$selected.toggle();
-        this.$holder.toggle();
-    },
-    /**
-     * 获取选中的 value 值
-     * @return {String}
-     */
-    getValue: function() {
-        //输入停顿X秒后，获得值
-        return this.$selected.attr('value') || -1;
-    },
-    /**
-     * 获取选中的 text 值
-     * @return {String}
-     */
-    getText: function() {
-        return this.$selected.html();
-    },
-    /**
      * 销毁
      */
     destroy: function() {
@@ -352,4 +384,30 @@ $.extend($.fn, {
 
 $(document).ready(function(){
     $('.new-auto-complete').AutoComplete();
+    $('.new-auto-complete').AutoComplete('setData', [{
+            text: 'abcdefg',
+            value: 1
+        },{
+            text: 'higklmn',
+            value: 2
+        },{
+            text: 'opqrst',
+            value: 3
+        },{
+            text: 'react',
+            value: 4
+        },{
+            text: 'redux',
+            value: 5
+        },{
+            text: 'angular',
+            value: 6
+        },{
+            text: 'sqlgraph',
+            value: 7
+        },{
+            text: 'vue',
+            value: 8
+        }]
+    )
 });

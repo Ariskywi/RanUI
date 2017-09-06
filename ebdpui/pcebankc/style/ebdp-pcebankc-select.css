@@ -7,19 +7,22 @@ body{
 .auto-complete{
     position: relative;
     margin: 10px;
-    font-family: "Microsoft Yahei"
+    font-family: "Microsoft Yahei";
+    width: 360px;
 }
 .auto-complete input {
     outline: none;
 }
 
 .auto-complete input, .select-selection-selected{
-    height: 32px;
-    line-height: 32px;
+    width: 350px;
+    height: 30px;
+    line-height: 30px;
     font-size: 14px;
     color: #C2C2C2;
     padding: 0 0 0 10px;
     border-radius: 2px;
+    border: 1px solid #dddddd;
 }
 .select-input-default,.select-selection-selected {
     border: 1px solid #dddddd;
@@ -40,10 +43,9 @@ body{
 }
 .select-selection-selected {
     color: #333333;
-}
-.select-selection-selected{
     cursor: pointer;
     position: absolute;
+    background: #fff;
 }
 .options-holder{
     position: absolute;
@@ -52,24 +54,22 @@ body{
     border: 1px solid #dddddd;
     float: left;
     overflow: auto;
-    height: 162px;
 }
-.options-select-tipHeader, .options-select-tipFooter {
+.options-select-tip{
     padding: 0 0 0 10px;
     color: #999999;
-    font-size:14px;
+    font-size: 14px;
 }
 .options{
     float: left;
     clear: left;
+    width: 360px;
     height: 24px;
     line-height: 24px;
-    padding: 0 20px 0 10px;
     border-top: 1px solid #fff;
     border-bottom: 1px solid #fff;
-    font-size:14px;
+    font-size: 14px;
     color: #333333;
-    width: 100%;
 }
 .options:hover, .options.selected{
     background: #e0e0e0;
