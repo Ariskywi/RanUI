@@ -1,0 +1,79 @@
+@charset "UTF-8";
+
+body{
+    margin: 0;
+    padding:0;
+}
+.auto-complete{
+    position: relative;
+    margin: 10px;
+    font-family: "Microsoft Yahei"
+}
+.auto-complete input {
+    outline: none;
+}
+
+.auto-complete input, .select-selection-selected{
+    height: 32px;
+    line-height: 32px;
+    font-size: 14px;
+    color: #C2C2C2;
+    padding: 0 0 0 10px;
+    border-radius: 2px;
+}
+.select-input-default,.select-selection-selected {
+    border: 1px solid #dddddd;
+}
+.select-input-checked {
+    border:solid 1px #94c0ed;
+}
+.select-input-arrow {
+    background:url(../style/images/sl-sel-arrow.png) no-repeat right 15px;
+    position: relative;
+    display: block;
+
+}
+.select-input-arrowUp {
+    background: url(../style/images/sl-sel-arrow.png) no-repeat right 8px;
+    position: relative;
+    display: block;
+}
+.select-selection-selected {
+    color: #333333;
+}
+.select-selection-selected{
+    cursor: pointer;
+    position: absolute;
+}
+.options-holder{
+    position: absolute;
+    width: auto;
+    display: none;
+    border: 1px solid #dddddd;
+    float: left;
+    overflow: auto;
+    height: 162px;
+}
+.options-select-tipHeader, .options-select-tipFooter {
+    padding: 0 0 0 10px;
+    color: #999999;
+    font-size:14px;
+}
+.options{
+    float: left;
+    clear: left;
+    height: 24px;
+    line-height: 24px;
+    padding: 0 20px 0 10px;
+    border-top: 1px solid #fff;
+    border-bottom: 1px solid #fff;
+    font-size:14px;
+    color: #333333;
+    width: 100%;
+}
+.options:hover, .options.selected{
+    background: #e0e0e0;
+    border-top: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
+    cursor: pointer;
+}
