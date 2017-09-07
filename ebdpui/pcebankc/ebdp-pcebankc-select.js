@@ -85,15 +85,36 @@ AutoComplete.prototype = {
         this.inputKeydown = this.inputKeydown.bind(this);
         this.selectedClick = this.selectedClick.bind(this);
         this.holderClick = this.holderClick.bind(this);
+        this.holderMouseOver = this.holderMouseOver.bind(this);
+        this.holderMouseOut = this.holderMouseOut.bind(this);
 
         this.$input
             .on('focus', this.inputFocus)
             .on('blur', this.inputBlur)
             .on('keydown', this.inputKeydown);
 
-        this.$holder.on('click', this.holderClick);
+        this.$holder.on('click', this.holderClick)
+            .on('mouseover',this.holderMouseOver)
+            .on('mouseout',this.holderMouseOut);
 
-        this.$selected.on('click', this.selectedClick)
+        this.$selected.on('click', this.selectedClick);
+    },
+    removeAllHoverStyle: function(){
+        this.$holder.find(".options").removeClass("hover");
+        return this;
+    },
+    /**
+     * option悬停样式
+     */
+    holderMouseOver: function(e){
+        this.removeAllHoverStyle();
+        $(e.target).addClass('hover');
+    },
+    /**
+     * option移除样式
+     */
+    holderMouseOut: function(e){
+        $(e.target).removeClass('hover');
     },
     /**
      * input focus
