@@ -167,7 +167,7 @@ AutoComplete.prototype = {
         });
 
         if (filterData.length === 1 && filterData[0].value > 0){
-            this.setSelection(filterData[0]);
+            // this.setSelection(filterData[0]);
         }
         if (this.options.header && filterData.length > 0){
             var headerOption = $('<div class="options-select-tip"></div>')
