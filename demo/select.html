@@ -19,7 +19,6 @@
                 width: 500,
                 arrow: true
             },
-            placeholder: '请选择',
             onChange: function(selection){
 //                if (selection){
 //                    console.log('change: ' + selection.text);
@@ -29,7 +28,11 @@
             },
             onBlur: function(selection){
 //                console.log('blur');
-            }
+            },
+            showNumber: 5,
+            // showDel: false,
+            // orderChange: false,
+            placeholder: '请选择'
             // asyncFilter: function(){},     // 调用方实现
         });
         // 设置数据
@@ -40,7 +43,7 @@
                 text: 'higklmn',
                 value: 2
             },{
-                text: 'opqrst',
+                text: '这是一条长长的测试用例这是一条长长的测试用例这是一条长长的测试用例这是一条长长的测试用例',
                 value: 3
             },{
                 text: 'react',
@@ -57,6 +60,9 @@
             },{
                 text: 'vue',
                 value: 8
+            },{
+                text: '1212123',
+                value: 9
             }]
         )
     });

@@ -18,6 +18,8 @@ function AutoComplete(item, options){
             width: 350,
             arrow: true
         },
+        showDel: true,
+        orderChange: true,
         latterTime: 1000,
         header:'默认展示前5条匹配结果，请输入更多以精确匹配',
         footer:'请输入更多关键字查询',
@@ -25,7 +27,7 @@ function AutoComplete(item, options){
             text: '请选择',
             value: -1
         }],
-        showNumber: 5
+        showNumber: 999999
     };
 
     this.options = $.extend(defaultOption, options || {});
@@ -66,7 +68,7 @@ AutoComplete.prototype = {
         // 添加dom节点
         this.$input = $('<input type="text" class="select-input-default" />');
         this.$selected = $('<div class="select-selection-selected"></div>');
-        this.$holder = $('<div class="options-holder">');
+        this.$holder = $('<div class="options-holder hidden">');
         this.$main.addClass('auto-complete')
             .append(this.$selected)
             .append(this.$input)
@@ -74,9 +76,6 @@ AutoComplete.prototype = {
 
         // 设定配置项
         this.options.data && this.setData(this.options.data);
-        if (this.options.styles) {
-            this.setStyles();
-        }
         this.setPlaceholder();
 
         // 注册事件
@@ -101,7 +100,7 @@ AutoComplete.prototype = {
         this.$selected.on('click', this.selectedClick);
     },
     removeAllHoverStyle: function(){
-        this.$holder.find(".options").removeClass("hover");
+        this.$holder.find('.hover').removeClass('hover');
         return this;
     },
     /**
@@ -109,7 +108,12 @@ AutoComplete.prototype = {
      */
     holderMouseOver: function(e){
         this.removeAllHoverStyle();
-        $(e.target).addClass('hover');
+        var $current = $(e.target);
+        if ($current.hasClass('.option-holder')) {
+            $current.addClass('hover');
+        }else{
+            $current.closest('.option-holder').addClass('hover');
+        }
     },
     /**
      * option移除样式
@@ -125,7 +129,7 @@ AutoComplete.prototype = {
         this.focusTimer = setTimeout(function(){
             if (_this.action !== 'select'){
                 _this.setData(_this.options.data);
-                _this.$holder.show();
+                _this.$holder.removeClass('hidden');
                 _this.action = 'focus';
             }
         }, this.options.latterTime);
@@ -143,7 +147,7 @@ AutoComplete.prototype = {
             _this.action = 'blur';
             if (_this.$holder.is(':visible')) {
                 _this.$selected.show();
-                _this.$holder.hide();
+                _this.$holder.addClass('hidden');
             }else{
                 _this.$selected.show();
             }
@@ -198,17 +202,24 @@ AutoComplete.prototype = {
     holderClick: function(e){
         this.action = 'select';
         var $current = $(e.target);
+        var $option = null;
+        if ($current.hasClass('option-holder')) {
+            $option = $current.children('.options');
+        }else if ($current.hasClass('options')) {
+            $option = $current;
+            // .closest('.option-holder').children('.options');
+        }
         clearTimeout(this.blurTimer);
-        if ($current.hasClass('options')) {
-            if ($current.val() < 0 ) {
+        if ($option !== null) {
+            if ($option.val() < 0 ) {
                 return;
             }
             this.setSelection({
-                text: $current.text(),
-                value: $current.val()
+                text: $option.text(),
+                value: $option.val()
             });
             $('.options').removeClass('selected');
-            $current.addClass('selected');
+            $option.addClass('selected');
             this.options.onChange && this.options.onChange(this.getSelection());
         }else{
             this.$input.focus();
@@ -234,7 +245,7 @@ AutoComplete.prototype = {
                 .removeClass('placeholder');
         }
 
-        this.$holder.hide();
+        this.$holder.addClass('hidden');
         this.$selected.show();
         this.$input.blur();
         // clearTimeout(this.blurTimer);
@@ -245,6 +256,12 @@ AutoComplete.prototype = {
      */
     setStyles: function(){
         var styles = this.options.styles;
+        var realWidth = 0;
+        this.$holder.find('.options').each(function(index, option){
+            if ($(option).width() > realWidth) {
+                realWidth = $(option).width();
+            }
+        });
         if (styles.arrow) {
             this.$input.addClass('showArrow');
             this.$selected.addClass('showArrow');
@@ -253,7 +270,7 @@ AutoComplete.prototype = {
             this.$main.css({width: styles.width});
             this.$input.css({width: styles.width});
             this.$selected.css({width: styles.width});
-            this.$main.find('.options').css({width: styles.width});
+            this.$holder.css({width: realWidth <= (styles.width - 200) ? styles.width : (realWidth + 200)});
         }
     },
     /**
@@ -268,14 +285,38 @@ AutoComplete.prototype = {
         this.filteredData = filterData;
 
         this.$holder.empty();
+        this.$holder.css({width: 'auto'}); 
         $.each(filterData, function(index, option){
             if (index >= _this.options.showNumber) {
                 return ;
             }
-            var newOption = $('<div class="options"></div>')
+            var $optionHolder = $('<div class="option-holder"></div>');
+            var $delBtn = $('<span class="del">删除</span>');
+            var $upOrder = $('<span class="up-arrow">↑</span>');
+            var $downOrder = $('<span class="down-arrow">↓</span>');
+            var $pos = $('<span class="parallel">-</span>');     // 占位
+            var $newOption = $('<span class="options"></span>')
                 .text(option.text)
                 .attr({value: option.value});
-            _this.$holder.append(newOption);
+
+            $optionHolder.append($newOption);
+            _this.options.showDel && $optionHolder.append($delBtn);
+            if (_this.options.orderChange) {
+                var minLen = _this.options.showNumber > filterData.length ? filterData.length : _this.options.showNumber;
+                if (index !== minLen -1 ) {
+                    $optionHolder.append($downOrder);
+                }else{
+                    $optionHolder.append($pos);
+                }
+                if (index !== 0) {
+                    $optionHolder.append($upOrder);
+                }else{
+                    $optionHolder.append($pos);
+                }
+            }
+            // _this.options.orderChange && (index !== (filterData.length -1)) && $optionHolder.append($downOrder);
+            // _this.options.orderChange && (index !== 0) && $optionHolder.append($upOrder);
+            _this.$holder.append($optionHolder);
         });
 
         if (filterData.length === 1 && /keypress/.test(this.action) && filterData[0].value > 0){
