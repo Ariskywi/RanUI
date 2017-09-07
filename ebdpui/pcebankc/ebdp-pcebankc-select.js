@@ -80,15 +80,6 @@ AutoComplete.prototype = {
         this.setPlaceholder();
 
         // 注册事件
-        // this.inputFocus = this.inputFocus.bind(this);
-        // this.inputBlur = this.inputBlur.bind(this);
-        // this.inputKeydown = this.inputKeydown.bind(this);
-        // this.selectedClick = this.selectedClick.bind(this);
-        // this.holderClick = this.holderClick.bind(this);
-        // this.holderMouseOver = this.holderMouseOver.bind(this);
-        // this.holderMouseOut = this.holderMouseOut.bind(this);
-
-
         this.inputFocus = $.proxy(this.inputFocus, this);
         this.inputBlur = $.proxy(this.inputBlur, this);
         this.inputKeydown = $.proxy(this.inputKeydown, this);
@@ -474,29 +465,3 @@ $.extend($.fn, {
         }
     }
 });
-// bind polifill
-(function () {
-    if (!Function.prototype.bind) {
-        Function.prototype.bind = function (oThis) {
-            if (typeof this !== "function") {
-                throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable")
-            }
-
-            var aArgs = Array.prototype.slice.call(arguments, 1),
-                fToBind = this,
-                fNOP = function () {},
-                fBound = function () {
-                    fBound.prototype = this instanceof fNOP ? new fNOP() : fBound.prototype
-                    return fToBind.apply(this instanceof fNOP
-                         ? this
-                         : oThis || this,
-                         aArgs )
-                }
-            if( this.prototype ) {
-                fNOP.prototype = this.prototype
-            }
-
-            return fBound
-        }
-    }
-})()
