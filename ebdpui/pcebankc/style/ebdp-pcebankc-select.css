@@ -8,7 +8,7 @@ body{
     position: relative;
     margin: 10px;
     font-family: "Microsoft Yahei";
-    width: 360px;
+    min-width: 360px;
 }
 .auto-complete input {
     outline: none;
@@ -30,22 +30,28 @@ body{
 .select-input-checked {
     border:solid 1px #94c0ed;
 }
-.select-input-arrow {
-    background:url(../style/images/sl-sel-arrow.png) no-repeat right 15px;
-    position: relative;
-    display: block;
+// .select-input-arrow {
+//     background:url(../style/images/sl-sel-arrow.png) no-repeat right 15px;
+//     position: relative;
+//     display: block;
 
-}
-.select-input-arrowUp {
-    background: url(../style/images/sl-sel-arrow.png) no-repeat right 8px;
-    position: relative;
-    display: block;
-}
+// }
+// .select-input-arrowUp {
+//     background: url(../style/images/sl-sel-arrow.png) no-repeat right 8px;
+//     position: relative;
+//     display: block;
+// }
 .select-selection-selected {
     color: #333333;
     cursor: pointer;
     position: absolute;
     background: #fff;
+}
+.auto-complete input.showArrow{
+    background: url(../style/images/sl-sel-arrow.png) no-repeat 98% -25px;
+}
+.select-selection-selected.showArrow{
+    background: url(../style/images/sl-sel-arrow.png) #fff no-repeat 98% 15px;
 }
 .options-holder{
     position: absolute;
@@ -63,13 +69,14 @@ body{
 .options{
     float: left;
     clear: left;
-    width: 360px;
+    width: 350px;
     height: 24px;
     line-height: 24px;
     border-top: 1px solid #fff;
     border-bottom: 1px solid #fff;
     font-size: 14px;
     color: #333333;
+    padding: 0 0 0 10px;
 }
 .options:hover, .options.selected{
     background: #e0e0e0;

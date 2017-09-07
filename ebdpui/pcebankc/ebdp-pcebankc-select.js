@@ -10,7 +10,7 @@ function AutoComplete(item, options){
     //判断是否是jQuery对象，数组或是单个DOM节点。
     var defaultOption = {
         styles: {
-            width: '350px',
+            width: 350,
             arrow: true
         },
         // asyncFilter: function(){},
@@ -66,7 +66,9 @@ AutoComplete.prototype = {
             .append(this.$holder);
 
         this.options.data && this.setData(this.options.data);
-        this.setStyles();
+        if (this.options.styles) {
+            this.setStyles();
+        }
         this.setPlaceholder();
 
         this.currentOption = null;
@@ -121,7 +123,17 @@ AutoComplete.prototype = {
      * @data {obj} styles 样式项
      */
     setStyles: function(){
-
+        var styles = this.options.styles;
+        if (styles.arrow) {
+            this.$input.addClass('showArrow');
+            this.$selected.addClass('showArrow');
+        }
+        if (styles.width) {
+            this.$main.css({width: styles.width});
+            this.$input.css({width: styles.width});
+            this.$selected.css({width: styles.width});
+            this.$main.find('.options').css({width: styles.width});
+        }
     },
     /**
      * 设置选项
@@ -132,6 +144,7 @@ AutoComplete.prototype = {
 
         this.options.data = data;
         var filterData = this.filterData(data);
+        this.filteredData = filterData;
 
         this.$holder.empty();
         $.each(filterData, function(index, option){
@@ -159,6 +172,7 @@ AutoComplete.prototype = {
                 .attr({value: -3});
             this.$holder.append(overOption)
         }
+        this.setStyles();
     },
     /**
      * 过滤数据
@@ -303,7 +317,6 @@ AutoComplete.prototype = {
 
             if(lpu < ctop){
                 this.$list.scrollTop(Math.max(0, lpu));
-                console.log(lpu + ":" + ctop + ":"+ (lpu))
             }else if(lpd > h + ctop){
                 this.$list.scrollTop(lpd - h)
             }
@@ -383,7 +396,12 @@ $.extend($.fn, {
 });
 
 $(document).ready(function(){
-    $('.new-auto-complete').AutoComplete();
+    $('.new-auto-complete').AutoComplete({
+        styles: {
+            width: 500,
+            arrow: true
+        }
+    });
     $('.new-auto-complete').AutoComplete('setData', [{
             text: 'abcdefg',
             value: 1
