@@ -10,5 +10,55 @@
     <h1>Select</h1>
     <div class="new-auto-complete"></div>
     <script type="text/javascript" src="../ebdpui/pcebankc/ebdp-pcebankc-select.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+        // 试用实例
+        $('.new-auto-complete').AutoComplete({
+            styles: {
+                width: 500,
+                arrow: true
+            },
+            placeholder: '请选择',
+            onChange: function(selection){
+//                if (selection){
+//                    console.log('change: ' + selection.text);
+//                }else{
+//                    console.log('change: ' + selection);
+//                }
+            },
+            onBlur: function(selection){
+//                console.log('blur');
+            },
+            // asyncFilter: function(){},     // 调用方实现
+        });
+        // 设置数据
+        $('.new-auto-complete').AutoComplete('setData', [{
+                text: 'abcdefg',
+                value: 1
+            },{
+                text: 'higklmn',
+                value: 2
+            },{
+                text: 'opqrst',
+                value: 3
+            },{
+                text: 'react',
+                value: 4
+            },{
+                text: 'redux',
+                value: 5
+            },{
+                text: 'angular',
+                value: 6
+            },{
+                text: 'sqlgraph',
+                value: 7
+            },{
+                text: 'vue',
+                value: 8
+            }]
+        )
+    });
+    </script>
 </body>
 </html>
