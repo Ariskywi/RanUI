@@ -125,6 +125,7 @@ AutoComplete.prototype = {
         this.$selected.on('click', function(e){
             _this.toggleSelected();
             _this.$input.focus();
+            _this.$input.removeClass('select-input-default').addClass('select-input-checked');
         });
     },
     /**
@@ -419,7 +420,7 @@ $(document).ready(function(){
             width: 500,
             arrow: true
         },
-        placeholder: '请输入关键字进行查找',
+        placeholder: '请选择',
         onChange: function(selection){
             // console.log(selection);
         },

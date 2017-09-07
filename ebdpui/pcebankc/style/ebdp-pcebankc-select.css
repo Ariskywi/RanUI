@@ -22,7 +22,6 @@ body{
     color: #C2C2C2;
     padding: 0 0 0 10px;
     border-radius: 2px;
-    border: 1px solid #dddddd;
 }
 .select-input-default,.select-selection-selected {
     border: 1px solid #dddddd;
@@ -51,7 +50,7 @@ body{
     background: url(../style/images/sl-sel-arrow.png) no-repeat 98% -25px;
 }
 .select-selection-selected.showArrow{
-    background: url(../style/images/sl-sel-arrow.png) #fff no-repeat 98% 15px;
+    background: url(../style/images/sl-sel-arrow.png) #fff no-repeat 98% 12px;
 }
 .options-holder{
     position: absolute;
@@ -83,4 +82,7 @@ body{
     border-top: 1px solid #e0e0e0;
     border-bottom: 1px solid #e0e0e0;
     cursor: pointer;
+}
+.placeholder {
+    color: #C2C2C2;
 }
