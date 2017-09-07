@@ -1,10 +1,12 @@
 /**
  * AutoComplete
  * @class
- * @param {HTMLElement|jQeruyObject} item              目标元素
+ * @param {HTMLElement|jQeruyObject} item       目标元素
  * @param {
- *      asyncFilter {function}            异步过滤函数(调用方A函数)
-    }      [options]                      参数
+ *      asyncFilter  {function}                 异步过滤函数(调用方A函数)
+ *      onChange     {function}                 选项改变回调
+ *      onBlur       {function}                 失去焦点回调
+    }      [options]                            参数
  */
 function AutoComplete(item, options){
     //判断是否是jQuery对象，数组或是单个DOM节点。
@@ -13,7 +15,7 @@ function AutoComplete(item, options){
             width: 350,
             arrow: true
         },
-        // asyncFilter: function(){},
+        latterTime: 1000,
         header:'默认展示前5条匹配结果，请输入更多以精确匹配',
         footer:'请输入更多关键字查询',
         data: [{
@@ -57,6 +59,7 @@ AutoComplete.prototype = {
         var _this = this;
         this.timer = null;
         this.blurTimer = null;      // blur时是否关闭
+        this.focusTimer = null;
         this.$input = $('<input type="text" class="select-input-default" />');
         this.$selected = $('<div class="select-selection-selected"></div>');
         this.$holder = $('<div class="options-holder">');
@@ -74,9 +77,9 @@ AutoComplete.prototype = {
         this.currentOption = null;
 
         this.$input.on('focus', function(e){
-            setTimeout(function(){
+            _this.focusTimer = setTimeout(function(){
                 _this.toggleHolder();
-            }, 1000 * 1);
+            }, _this.options.latterTime);
         }).on('blur', function(e){
             // 延迟触发,保证blur触发在option的click之后
             _this.blurTimer = setTimeout(function(){
@@ -88,15 +91,22 @@ AutoComplete.prototype = {
                 var searchKey = _this.getSearchKey();
                 var newOption = null;
                 if (searchKey === '') {
-                    
+                    if (_this.currentOption !== null) {
+                        newOption = {
+                            text: _this.currentOption.text,
+                            value: _this.currentOption.text
+                        }
+                    }
                 }else{
                     newOption = {
                         text: searchKey,
                         value: searchKey
                     }
-                    _this.setSelection(newOption);
                 }
+                _this.setSelection(newOption);
+                clearTimeout(_this.focusTimer);
             }, 200);
+            _this.options.onBlur && _this.options.onBlur(_this.getSelection());
         }).on('keydown', function(e){
             clearTimeout(_this.timer);
             _this.timer = setTimeout(function(){
@@ -105,7 +115,7 @@ AutoComplete.prototype = {
                 }else{
                     _this.options.data && _this.setData(_this.options.data);
                 }
-            }, 1000 * 1);
+            }, _this.options.latterTime);
         });
 
         this.$holder.on('click', function(e){
@@ -115,7 +125,6 @@ AutoComplete.prototype = {
         this.$selected.on('click', function(e){
             _this.toggleSelected();
             _this.$input.focus();
-            // _this.$input.addClass('select-input-checked');
         });
     },
     /**
@@ -228,19 +237,27 @@ AutoComplete.prototype = {
             $current.addClass('selected');
             this.options.onClick && _this.options.onClick();
         }
+        this.options.onChange && this.options.onChange(this.getSelection());
     },
     /**
      * 设置当前选择项
      */
     setSelection: function(option){
-        this.currentOption = {
-            text: option.text,
-            value: option.value
+        if (option === null) {
+            this.currentOption = option;
+            this.$input.val('');
+            this.setPlaceholder();
+            this.$selected.addClass('placeholder');
+        }else{
+            this.currentOption = {
+                text: option.text,
+                value: option.value
+            }
+            this.$input.val(option.text);
+            this.$selected.text(option.text)
+                .attr({value: option.value})
+                .removeClass('placeholder');
         }
-        this.$input.val(option.text);
-        this.$selected.text(option.text)
-            .attr({value: option.value})
-            .removeClass('placeholder');
 
         this.$holder.hide();
         this.$selected.show();
@@ -396,12 +413,22 @@ $.extend($.fn, {
 });
 
 $(document).ready(function(){
+    // 试用实例
     $('.new-auto-complete').AutoComplete({
         styles: {
             width: 500,
             arrow: true
-        }
+        },
+        placeholder: '请输入关键字进行查找',
+        onChange: function(selection){
+            // console.log(selection);
+        },
+        onBlur: function(selection){
+            // console.log(selection);
+        },
+        // asyncFilter: function(){},     // 调用方实现
     });
+    // 设置数据
     $('.new-auto-complete').AutoComplete('setData', [{
             text: 'abcdefg',
             value: 1
