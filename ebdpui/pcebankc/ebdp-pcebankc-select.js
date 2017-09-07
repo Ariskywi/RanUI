@@ -323,11 +323,11 @@ AutoComplete.prototype = {
     fuzzyFilter: function(searchKey, searchText){
         var compareString = searchText.toLowerCase();
         searchKey = searchKey.toLowerCase();
-
+        var len = searchText.length;
         var searchTextIndex = 0;
-        for (var index = 0; index < searchText.length; index++) {
-            if (compareString[index] === searchKey[searchTextIndex]) {
-                searchTextIndex += 1;
+        for (var index = 0; index < len; index++) {
+            if (searchKey.charAt(searchTextIndex) === compareString.charAt(index)) {
+                searchTextIndex++;
             }
         }
 
