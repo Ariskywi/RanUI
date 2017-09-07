@@ -93,7 +93,8 @@ AutoComplete.prototype = {
             .on('blur', this.inputBlur)
             .on('keydown', this.inputKeydown);
 
-        this.$holder.on('click', this.holderClick)
+        this.$holder
+            .on('click', this.holderClick)
             .on('mouseover',this.holderMouseOver)
             .on('mouseout',this.holderMouseOut);
 
@@ -121,10 +122,12 @@ AutoComplete.prototype = {
      */
     inputFocus: function(e){
         var _this = this;
-        this.action = 'focus';
         this.focusTimer = setTimeout(function(){
-            _this.setData(_this.options.data);
-            _this.toggleHolder();
+            if (_this.action !== 'select'){
+                _this.setData(_this.options.data);
+                _this.$holder.show();
+                _this.action = 'focus';
+            }
         }, this.options.latterTime);
     },
     /**
@@ -134,28 +137,33 @@ AutoComplete.prototype = {
         var _this = this;
         // 延迟触发,保证blur触发在option的click之后
         this.blurTimer = setTimeout(function(){
+            // if (_this.action === 'auto' || _this.action === 'blur'){
+            //     return;
+            // }
             _this.action = 'blur';
             if (_this.$holder.is(':visible')) {
                 _this.$selected.show();
                 _this.$holder.hide();
+            }else{
+                _this.$selected.show();
             }
             // 如果不是点击选项关闭，则设置输入框内的值
-            var searchKey = _this.getSearchKey();
-            var newOption = null;
-            if (searchKey === '') {
-                if (_this.currentOption !== null) {
-                    newOption = {
-                        text: _this.currentOption.text,
-                        value: _this.currentOption.text
-                    }
-                }
-            }else{
-                newOption = {
-                    text: searchKey,
-                    value: searchKey
-                }
-            }
-            _this.setSelection(newOption);
+            // var searchKey = _this.getSearchKey();
+            // var newOption = null;
+            // if (searchKey === '') {
+            //     if (_this.currentOption !== null) {
+            //         newOption = {
+            //             text: _this.currentOption.text,
+            //             value: _this.currentOption.text
+            //         }
+            //     }
+            // }else{
+            //     newOption = {
+            //         text: searchKey,
+            //         value: searchKey
+            //     }
+            // }
+            // _this.setSelection(newOption);
             clearTimeout(_this.focusTimer);
         }, 200);
         this.options.onBlur && this.options.onBlur();
@@ -179,16 +187,57 @@ AutoComplete.prototype = {
      * selected click
      */
     selectedClick: function(e){
-        this.toggleSelected();
+        this.action = 'active';
+        this.$selected.hide();
         this.$input.focus();
         this.$input.removeClass('select-input-default').addClass('select-input-checked');
     },
     /**
-     * holder click
+     * 点击处理
      */
     holderClick: function(e){
         this.action = 'select';
-        this.select.call(this, e);
+        var $current = $(e.target);
+        clearTimeout(this.blurTimer);
+        if ($current.hasClass('options')) {
+            if ($current.val() < 0 ) {
+                return;
+            }
+            this.setSelection({
+                text: $current.text(),
+                value: $current.val()
+            });
+            $('.options').removeClass('selected');
+            $current.addClass('selected');
+            this.options.onChange && this.options.onChange(this.getSelection());
+        }else{
+            this.$input.focus();
+        }
+    },
+    /**
+     * 设置当前选择项
+     */
+    setSelection: function(option){
+        if (option === null) {
+            this.currentOption = option;
+            this.$input.val('');
+            this.setPlaceholder();
+            this.$selected.addClass('placeholder');
+        }else{
+            this.currentOption = {
+                text: option.text,
+                value: option.value
+            }
+            this.$input.val(option.text);
+            this.$selected.text(option.text)
+                .attr({value: option.value})
+                .removeClass('placeholder');
+        }
+
+        this.$holder.hide();
+        this.$selected.show();
+        this.$input.blur();
+        // clearTimeout(this.blurTimer);
     },
     /**
      * 设置样式
@@ -229,8 +278,12 @@ AutoComplete.prototype = {
             _this.$holder.append(newOption);
         });
 
-        if (filterData.length === 1 && filterData[0].value > 0){
-            // this.setSelection(filterData[0]);
+        if (filterData.length === 1 && /keypress/.test(this.action) && filterData[0].value > 0){
+            var actionInfo = this.action.split('-');
+            if (actionInfo[1] != 8 && actionInfo[1] != 46){
+                this.action = 'auto';
+                this.setSelection(filterData[0]);
+            }
         }
         if (this.options.header && filterData.length > 0){
             var headerOption = $('<div class="options-select-tip"></div>')
@@ -281,52 +334,6 @@ AutoComplete.prototype = {
         return searchTextIndex === searchKey.length;
     },
     /**
-     * 点击处理
-     */
-    select: function(e){
-        var $current = $(e.target);
-
-        clearTimeout(this.blurTimer);
-
-        if ($current.hasClass('options')) {
-            if ($current.val() < 0 ) {
-                return;
-            }
-            this.setSelection({
-                text: $current.text(),
-                value: $current.val()
-            });
-            $('.options').removeClass('selected');
-            $current.addClass('selected');
-            this.options.onChange && this.options.onChange(this.getSelection());
-            // this.options.onClick && _this.options.onClick();
-        }
-        this.$selected.focus();
-    },
-    /**
-     * 设置当前选择项
-     */
-    setSelection: function(option){
-        if (option === null) {
-            this.currentOption = option;
-            this.$input.val('');
-            this.setPlaceholder();
-            this.$selected.addClass('placeholder');
-        }else{
-            this.currentOption = {
-                text: option.text,
-                value: option.value
-            }
-            this.$input.val(option.text);
-            this.$selected.text(option.text)
-                .attr({value: option.value})
-                .removeClass('placeholder');
-        }
-
-        this.$holder.hide();
-        this.$selected.show();
-    },
-    /**
      * 获取当前项
      * @data {array} options 选项
      */
@@ -357,18 +364,18 @@ AutoComplete.prototype = {
     /**
      * 切换待选框
      */
-    toggleHolder: function(){
-        this.$holder.toggle();
-    },
+    // toggleHolder: function(){
+    //     this.$holder.toggle();
+    // },
     /**
      * 切换已选
      */
-    toggleSelected: function(){
-        this.$selected.toggle();
-        if (this.$selected.is(':visible')) {
-            this.setPlaceholder();
-        }
-    },
+    // toggleSelected: function(){
+    //     this.$selected.toggle();
+    //     if (this.$selected.is(':visible')) {
+    //         this.setPlaceholder();
+    //     }
+    // },
 
     /**
      * 设置placeholder
