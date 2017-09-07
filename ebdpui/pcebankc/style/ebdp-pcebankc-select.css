@@ -29,17 +29,6 @@ body{
 .select-input-checked {
     border:solid 1px #94c0ed;
 }
-// .select-input-arrow {
-//     background:url(../style/images/sl-sel-arrow.png) no-repeat right 15px;
-//     position: relative;
-//     display: block;
-
-// }
-// .select-input-arrowUp {
-//     background: url(../style/images/sl-sel-arrow.png) no-repeat right 8px;
-//     position: relative;
-//     display: block;
-// }
 .select-selection-selected {
     color: #333333;
     cursor: pointer;
@@ -58,6 +47,7 @@ body{
     display: none;
     border: 1px solid #dddddd;
     float: left;
+    height:164px;
     overflow: auto;
 }
 .options-select-tip{

@@ -126,7 +126,7 @@ AutoComplete.prototype = {
             _this.toggleSelected();
             _this.$input.focus();
             _this.$input.removeClass('select-input-default').addClass('select-input-checked');
-        });
+        })
     },
     /**
      * 设置样式
