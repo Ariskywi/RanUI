@@ -6,7 +6,6 @@ body{
 }
 .auto-complete{
     position: relative;
-    margin: 10px;
     font-family: "Microsoft Yahei";
     min-width: 360px;
 }
@@ -46,9 +45,11 @@ body{
     width: auto;
     display: none;
     border: 1px solid #dddddd;
-    float: left;
+    // float: left;
     height:164px;
     overflow: auto;
+    top: 32px;
+    left: 0;
 }
 .options-select-tip{
     padding: 0 0 0 10px;
