@@ -226,7 +226,6 @@ AutoComplete.prototype = {
             });
             $('.options').removeClass('selected');
             $option.addClass('selected');
-            this.options.onChange && this.options.onChange(this.getSelection());
         }else{
             this.$input.focus();
         }
@@ -255,6 +254,7 @@ AutoComplete.prototype = {
         this.$selected.show();
         // 主动触发blur,使过程可控
         this.$input.blur();
+        this.options.onChange && this.options.onChange(this.getSelection());
         // clearTimeout(this.blurTimer);
     },
     /**
