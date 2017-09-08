@@ -81,7 +81,7 @@ AutoComplete.prototype = {
         // 注册事件
         this.inputFocus = $.proxy(this.inputFocus, this);
         this.inputBlur = $.proxy(this.inputBlur, this);
-        this.inputKeydown = $.proxy(this.inputKeydown, this);
+        this.inputChange = $.proxy(this.inputChange, this);
         this.selectedClick = $.proxy(this.selectedClick, this);
         this.holderClick = $.proxy(this.holderClick, this);
         this.holderMouseOver = $.proxy(this.holderMouseOver, this);
@@ -90,7 +90,9 @@ AutoComplete.prototype = {
         this.$input
             .on('focus', this.inputFocus)
             .on('blur', this.inputBlur)
-            .on('keydown', this.inputKeydown);
+            .on('keydown', this.inputChange);
+            // .on('input', this.inputChange)
+            // .on('propertychange', this.inputChange);
 
         this.$holder
             .on('click', this.holderClick)
@@ -127,6 +129,7 @@ AutoComplete.prototype = {
     inputFocus: function(e){
         var _this = this;
         this.$selected.hide();
+        this.$input[0].select();
         this.focusTimer = setTimeout(function(){
             if (_this.action !== 'select'){
                 _this.setData(_this.options.data);
@@ -176,8 +179,11 @@ AutoComplete.prototype = {
     /**
      * input keydown
      */
-    inputKeydown: function(e){
+    inputChange: function(e){
         var _this = this;
+        if (e.keyCode === 37 || e.keyCode === 39) {
+            return;
+        }
         this.action = 'keypress-' + e.keyCode;
         clearTimeout(_this.timer);
         this.timer = setTimeout(function(){
