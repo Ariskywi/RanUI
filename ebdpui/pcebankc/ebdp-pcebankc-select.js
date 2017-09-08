@@ -493,8 +493,24 @@ AutoComplete.prototype = {
      * 销毁
      */
     destroy: function() {
-        this.$label.off('click').remove();
-        this.$main.data(dataKey, null);
+        this.$input
+            .off('focus', this.inputFocus)
+            .off('blur', this.inputBlur)
+            .off('keydown', this.inputChange)
+            .remove();
+
+        this.$holder
+            .off('click', this.holderClick)
+            .off('mouseover',this.holderMouseOver)
+            .off('mouseout',this.holderMouseOut)
+            .remove();
+
+        this.$selected
+            .off('click', this.selectedClick)
+            .remove();
+        this.$main
+            .data(dataKey, null)
+            .html('');
     }
 };
 //判断是否已经实例化
