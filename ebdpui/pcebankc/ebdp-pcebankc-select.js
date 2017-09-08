@@ -32,23 +32,9 @@ function AutoComplete(item, options){
 
     this.options = $.extend(defaultOption, options || {});
 
-    if (item instanceof jQuery) {
-        item.each(function(index, ele){
-            new AutoComplete(ele, options);
-            return this;
-        });
-    }else{
-        if (item instanceof Array) {
-            for (var i = item.length - 1; i >= 0; i--) {
-                new AutoComplete(item[i], options);
-                return this;
-            }
-        }else{
-            this.main = item;
-            this.$main = $(this.main);
-            this.init(this.options);
-        }
-    }
+    this.main = item;
+    this.$main = $(this.main);
+    this.init(this.options);
 }
 
 AutoComplete.prototype = {
@@ -79,13 +65,13 @@ AutoComplete.prototype = {
         this.setPlaceholder();
 
         // 注册事件
-        this.inputFocus = $.proxy(this.inputFocus, this);
-        this.inputBlur = $.proxy(this.inputBlur, this);
-        this.inputChange = $.proxy(this.inputChange, this);
-        this.selectedClick = $.proxy(this.selectedClick, this);
-        this.holderClick = $.proxy(this.holderClick, this);
-        this.holderMouseOver = $.proxy(this.holderMouseOver, this);
-        this.holderMouseOut = $.proxy(this.holderMouseOut, this);
+        this.inputFocus         = $.proxy(this.inputFocus, this);
+        this.inputBlur          = $.proxy(this.inputBlur, this);
+        this.inputChange        = $.proxy(this.inputChange, this);
+        this.selectedClick      = $.proxy(this.selectedClick, this);
+        this.holderClick        = $.proxy(this.holderClick, this);
+        this.holderMouseOver    = $.proxy(this.holderMouseOver, this);
+        this.holderMouseOut     = $.proxy(this.holderMouseOut, this);
 
         this.$input
             .on('focus', this.inputFocus)
@@ -129,7 +115,6 @@ AutoComplete.prototype = {
     inputFocus: function(e){
         var _this = this;
         this.$selected.hide();
-        this.$input[0].select();
         this.focusTimer = setTimeout(function(){
             if (_this.action !== 'select'){
                 _this.setData(_this.options.data);
@@ -143,17 +128,12 @@ AutoComplete.prototype = {
      */
     inputBlur: function(e){
         var _this = this;
+        clearTimeout(this.focusTimer);
         // 延迟触发,保证blur触发在option的click之后
         this.blurTimer = setTimeout(function(){
             if (_this.action === 'auto' || _this.action === 'blur' || _this.action === 'select'){
                 return;
             }else{
-                // if (_this.$holder.hasClass('hidden')) {
-                //     _this.$selected.show();
-                // }else{
-                //     _this.$holder.addClass('hidden');
-                //     _this.$selected.show();
-                // }
                 _this.action = 'blur';
                 // 如果不是点击选项关闭，则设置输入框内的值
                 var searchKey = _this.getSearchKey();
@@ -171,7 +151,6 @@ AutoComplete.prototype = {
                     }
                 }
                 _this.setSelection(newOption);
-                clearTimeout(_this.focusTimer);
             }
         }, 200);
         this.options.onBlur && this.options.onBlur();
@@ -199,7 +178,7 @@ AutoComplete.prototype = {
      */
     selectedClick: function(e){
         this.action = 'active';
-        this.$input.focus();
+        this.$input[0].select();     // 会触发input的focus
         this.$input.removeClass('select-input-default').addClass('select-input-checked');
     },
     /**
@@ -297,12 +276,12 @@ AutoComplete.prototype = {
             if (index >= _this.options.showNumber) {
                 return ;
             }
-            var $optionHolder = $('<div class="option-holder"></div>');
-            var $delBtn = $('<span class="del">删除</span>');
-            var $upOrder = $('<span class="up-arrow">↑</span>');
-            var $downOrder = $('<span class="down-arrow">↓</span>');
-            var $pos = $('<span class="parallel">-</span>');     // 占位
-            var $newOption = $('<span class="options"></span>')
+            var $optionHolder   = $('<div class="option-holder"></div>');
+            var $delBtn         = $('<span class="del">删除</span>');
+            var $upOrder        = $('<span class="up-arrow">↑</span>');
+            var $downOrder      = $('<span class="down-arrow">↓</span>');
+            var $pos            = $('<span class="parallel">-</span>');     // 占位
+            var $newOption      = $('<span class="options"></span>')
                 .text(option.text)
                 .attr({value: option.value});
 
@@ -321,8 +300,6 @@ AutoComplete.prototype = {
                     $optionHolder.append($pos);
                 }
             }
-            // _this.options.orderChange && (index !== (filterData.length -1)) && $optionHolder.append($downOrder);
-            // _this.options.orderChange && (index !== 0) && $optionHolder.append($upOrder);
             _this.$holder.append($optionHolder);
         });
 
@@ -427,66 +404,6 @@ AutoComplete.prototype = {
         var searchKey = this.getSearchKey();
         if (searchKey === null || searchKey === '') {
             this.$selected.text(this.options.placeholder || '请选择').addClass('placeholder');
-        }
-    },
-    //关键词搜索
-    keywordSearch: function(e){
-        var keyword = $(e.currentTarget).val();
-        //传给过滤函数
-
-        if(!keyword){
-            //渲染列表
-        }
-
-        function getCurrentHoverItem(){
-            var list = this.$list.find("li.hover");
-            return list.length ? list : null;
-        }
-        function setListScroll(li){
-            var ctop = this.$list.scrollTop(), h = 320, pd = 4, lih = 24, index = this.$list.find("li").index(li),
-                lpd = (index + 2) * lih + pd, lpu = index*lih +pd;
-
-            if(lpu < ctop){
-                this.$list.scrollTop(Math.max(0, lpu));
-            }else if(lpd > h + ctop){
-                this.$list.scrollTop(lpd - h)
-            }
-            return this;
-        }
-        //支持键盘上线选择和回车导入
-        if(e.keyCode == 13){//选中，触发select事件
-            var li = getCurrentHoverItem.call(this);
-            li && li.click();
-        }else if(e.keyCode == 38){//上移
-            var li = getCurrentHoverItem.call(this);
-            this._removeAllHoverStyle();
-
-            if(li){
-                var prev = li.prev();
-                if(prev.length){
-                    li = li.removeClass("hover").prev().addClass("hover");
-                }else{
-                    li.addClass("hover");
-                }
-            }else{
-                li = this.$list.find("li").first().addClass("hover");
-            }
-            setListScroll.call(this, li);
-        }else if(e.keyCode == 40){//下移
-            var li = getCurrentHoverItem.call(this);
-            this._removeAllHoverStyle();
-
-            if(li){
-                var next = li.next();
-                if(next.length){
-                    li = li.removeClass("hover").next().addClass("hover");
-                }else{
-                    li.addClass("hover");
-                }
-            }else{
-                li = this.$list.find("li").first().addClass("hover");
-            }
-            setListScroll.call(this, li);
         }
     },
     /**
