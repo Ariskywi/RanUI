@@ -206,17 +206,17 @@ AutoComplete.prototype = {
      * 点击处理
      */
     holderClick: function(e){
-        this.action = 'select';
         var $current = $(e.target);
         var $option = null;
+        clearTimeout(this.blurTimer);
         if ($current.hasClass('option-holder')) {
             $option = $current.children('.options');
         }else if ($current.hasClass('options')) {
             $option = $current;
             // .closest('.option-holder').children('.options');
         }
-        clearTimeout(this.blurTimer);
         if ($option !== null) {
+            this.action = 'select';
             if ($option.val() < 0 ) {
                 return;
             }
