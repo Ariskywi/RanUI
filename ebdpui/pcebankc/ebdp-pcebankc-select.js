@@ -18,8 +18,8 @@ function AutoComplete(item, options){
             width: 350,
             arrow: true
         },
-        showDel: true,
-        orderChange: true,
+        showDel: true,          // 删除
+        orderChange: true,      // 是否可移动
         latterTime: 1000,
         header:'默认展示前5条匹配结果，请输入更多以精确匹配',
         footer:'请输入更多关键字查询',
@@ -126,6 +126,7 @@ AutoComplete.prototype = {
      */
     inputFocus: function(e){
         var _this = this;
+        this.$selected.hide();
         this.focusTimer = setTimeout(function(){
             if (_this.action !== 'select'){
                 _this.setData(_this.options.data);
@@ -145,10 +146,10 @@ AutoComplete.prototype = {
             //     return;
             // }
             _this.action = 'blur';
-            if (_this.$holder.is(':visible')) {
+            if (_this.$holder.hasClass('hidden')) {
                 _this.$selected.show();
-                _this.$holder.addClass('hidden');
             }else{
+                _this.$holder.addClass('hidden');
                 _this.$selected.show();
             }
             // 如果不是点击选项关闭，则设置输入框内的值
@@ -192,7 +193,6 @@ AutoComplete.prototype = {
      */
     selectedClick: function(e){
         this.action = 'active';
-        this.$selected.hide();
         this.$input.focus();
         this.$input.removeClass('select-input-default').addClass('select-input-checked');
     },
