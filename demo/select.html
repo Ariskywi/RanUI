@@ -20,16 +20,17 @@
                 arrow: true
             },
             onChange: function(selection){
-//                if (selection){
-//                    console.log('change: ' + selection.text);
-//                }else{
-//                    console.log('change: ' + selection);
-//                }
+               if (selection){
+                   console.log('change: ' + selection.text);
+               }else{
+                   console.log('没有选择');
+               }
             },
             onBlur: function(selection){
 //                console.log('blur');
             },
             showNumber: 5,
+            // latterTime: 2000,                // 毫秒
             // showDel: false,
             // orderChange: false,
             placeholder: '请选择'

@@ -145,34 +145,34 @@ AutoComplete.prototype = {
         var _this = this;
         // 延迟触发,保证blur触发在option的click之后
         this.blurTimer = setTimeout(function(){
-            // if (_this.action === 'auto' || _this.action === 'blur'){
-            //     return;
-            // }
-            _this.action = 'blur';
-            if (_this.$holder.hasClass('hidden')) {
-                _this.$selected.show();
+            if (_this.action === 'auto' || _this.action === 'blur' || _this.action === 'select'){
+                return;
             }else{
-                _this.$holder.addClass('hidden');
-                _this.$selected.show();
+                // if (_this.$holder.hasClass('hidden')) {
+                //     _this.$selected.show();
+                // }else{
+                //     _this.$holder.addClass('hidden');
+                //     _this.$selected.show();
+                // }
+                _this.action = 'blur';
+                // 如果不是点击选项关闭，则设置输入框内的值
+                var searchKey = _this.getSearchKey();
+                var newOption = null;
+                if (searchKey !== '') {
+                    // 不在待选项中
+                    var index = _this.findOption(searchKey);
+                    if ( index < 0) {
+                        newOption = {
+                            text: searchKey,
+                            value: searchKey
+                        }
+                    }else{
+                        newOption = _this.options.data[index];
+                    }
+                }
+                _this.setSelection(newOption);
+                clearTimeout(_this.focusTimer);
             }
-            // 如果不是点击选项关闭，则设置输入框内的值
-            // var searchKey = _this.getSearchKey();
-            // var newOption = null;
-            // if (searchKey === '') {
-            //     if (_this.currentOption !== null) {
-            //         newOption = {
-            //             text: _this.currentOption.text,
-            //             value: _this.currentOption.text
-            //         }
-            //     }
-            // }else{
-            //     newOption = {
-            //         text: searchKey,
-            //         value: searchKey
-            //     }
-            // }
-            // _this.setSelection(newOption);
-            clearTimeout(_this.focusTimer);
         }, 200);
         this.options.onBlur && this.options.onBlur();
     },
@@ -253,6 +253,7 @@ AutoComplete.prototype = {
 
         this.$holder.addClass('hidden');
         this.$selected.show();
+        // 主动触发blur,使过程可控
         this.$input.blur();
         // clearTimeout(this.blurTimer);
     },
@@ -379,6 +380,18 @@ AutoComplete.prototype = {
         }
 
         return searchTextIndex === searchKey.length;
+    },
+    findOption: function(searchKey){
+        var index = -1;
+        var data = this.options.data;
+        var len = data.length;
+        for (var i = 0; i < len; i++) {
+            if (searchKey == data[i].text) {
+                index = i;
+                break;
+            }
+        }
+        return index;
     },
     /**
      * 获取当前项
