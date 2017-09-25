@@ -1,0 +1,102 @@
+@charset "UTF-8";
+
+body{
+    margin: 0;
+    padding:0;
+}
+.auto-complete{
+    position: relative;
+    font-family: "Microsoft Yahei";
+    min-width: 360px;
+}
+.auto-complete input {
+    outline: none;
+}
+
+.auto-complete input, .select-selection-selected{
+    width: 350px;
+    height: 30px;
+    line-height: 30px;
+    font-size: 14px;
+    color: #C2C2C2;
+    padding: 0 10px;
+    border-radius: 2px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+.select-input-default,.select-selection-selected {
+    border: 1px solid #dddddd;
+}
+.select-input-checked {
+    border:solid 1px #94c0ed;
+}
+.select-selection-selected {
+    color: #333333;
+    cursor: pointer;
+    position: absolute;
+    background: #fff;
+}
+.auto-complete input.showArrow{
+    background: url(../style/images/sl-sel-arrow.png) no-repeat 98% -25px;
+}
+.select-selection-selected.showArrow{
+    background: url(../style/images/sl-sel-arrow.png) #fff no-repeat 98% 12px;
+}
+.options-holder{
+    position: absolute;
+    display: block;
+    padding: 10px;
+    border: 1px solid #dddddd;
+    height:164px;
+    overflow: auto;
+    top: 32px;
+    left: 0;
+}
+.options-holder.hidden{
+    left: -99999px;
+}
+.options-select-tip{
+    // float: left;
+    width: 100%;
+    color: #999999;
+    font-size: 14px;
+}
+.options{
+    float: left;
+}
+.option-holder.hover, .option-holder.selected{
+    background: #e0e0e0;
+    border-top: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
+    cursor: pointer;
+}
+.placeholder {
+    color: #C2C2C2;
+}
+.option-holder{
+    float: left;
+    clear: left;
+    width: 100%;
+    height: 24px;
+    line-height: 24px;
+    border-top: 1px solid #fff;
+    border-bottom: 1px solid #fff;
+    font-size: 14px;
+    color: #333333;
+    white-space: nowrap;
+}
+.up-arrow, .down-arrow, .del, .parallel{
+    float: right;
+    margin-left: 10px;
+    padding: 0 10px;
+    cursor: pointer;
+}
+.up-arrow:hover, .down-arrow:hover, .del:hover{
+    background: #c2c2c2;
+}
+
+/*展示*/
+body{
+    padding: 50px;
+}

@@ -76,9 +76,9 @@ AutoComplete.prototype = {
         this.$input
             .on('focus', this.inputFocus)
             .on('blur', this.inputBlur)
-            // .on('keydown', this.inputChange);
-            .on('input', this.inputChange)
-            .on('propertychange', this.inputChange);
+            .on('keydown', this.inputChange);
+            // .on('input', this.inputChange)
+            // .on('propertychange', this.inputChange);
 
         this.$holder
             .on('click', this.holderClick)
@@ -159,7 +159,6 @@ AutoComplete.prototype = {
      * input keydown
      */
     inputChange: function(e){
-        // console.log(e.type)
         var _this = this;
         if (e.keyCode === 37 || e.keyCode === 39) {
             return;
@@ -414,8 +413,7 @@ AutoComplete.prototype = {
         this.$input
             .off('focus', this.inputFocus)
             .off('blur', this.inputBlur)
-            .off('input', this.inputChange)
-            .off('propertychange', this.inputChange)
+            .off('keydown', this.inputChange)
             .remove();
 
         this.$holder

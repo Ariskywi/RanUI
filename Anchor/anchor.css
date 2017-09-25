@@ -1,0 +1,45 @@
+@charset "UTF-8";
+.Anchor{
+    padding: 50px;
+    overflow: hidden;
+}
+.auchor input{
+    width: 90%;
+    height: 30px;
+    line-height: 30px;
+    font-size: 23px;
+    margin: 20px 0;
+}
+.container{
+    width: 90%;
+    overflow: auto;
+    max-height: 600px;
+    display: flex;
+    flex-flow: column nowrap;
+}
+.aside-menu{
+    position: absolute;
+    right: 0;
+    background: rgba(180, 223, 235, 0.2);
+}
+.aside-menu a{
+    display: block;
+    height: 66px;
+    line-height: 66px;
+    text-align: center;
+    padding: 0 20px;
+    cursor: pointer;
+    color: blue;
+    border-bottom: 1px solid #7eea52;
+}
+.option-holder{
+    flex: 1 1 auto;
+}
+.option-label{
+    color: #f3f3f3;
+    background: #5c5c5c;
+}
+.option{
+    height: 100px;
+    line-height: 100px;
+}
